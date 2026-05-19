@@ -31,29 +31,48 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      const currentUser = session?.user ?? null
-      setUser(currentUser)
-      if (currentUser) {
-        await fetchProfile(currentUser.id)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const currentUser = session?.user ?? null
+        setUser(currentUser)
+        if (currentUser) {
+          await fetchProfile(currentUser.id)
+        }
+      } catch (err) {
+        console.error('Erro ao recuperar sessão:', err)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     getSession()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null
-      setUser(currentUser)
-      if (currentUser) {
-        await fetchProfile(currentUser.id)
-      } else {
-        setProfile(null)
-      }
+    let subscription
+    try {
+      const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        try {
+          const currentUser = session?.user ?? null
+          setUser(currentUser)
+          if (currentUser) {
+            await fetchProfile(currentUser.id)
+          } else {
+            setProfile(null)
+          }
+        } catch (err) {
+          console.error('Erro no onAuthStateChange:', err)
+        } finally {
+          setLoading(false)
+        }
+      })
+      subscription = data?.subscription
+    } catch (err) {
+      console.error('Erro ao escutar mudanças de autenticação:', err)
       setLoading(false)
-    })
+    }
 
-    return () => subscription.unsubscribe()
+    return () => {
+      if (subscription) subscription.unsubscribe()
+    }
   }, [])
 
   const login = (email, password) => supabase.auth.signInWithPassword({ email, password })
