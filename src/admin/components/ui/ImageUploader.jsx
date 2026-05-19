@@ -36,8 +36,13 @@ export default function ImageUploader({ value, onChange, label = 'Imagem de Capa
           <img src={value} alt="Preview" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <button
-              onClick={() => onChange('')}
-              className="p-2 bg-white text-red-500 rounded-full hover:bg-red-50 transition-colors"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onChange('')
+              }}
+              className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-md border border-red-600 flex items-center justify-center"
             >
               <X size={20} />
             </button>
