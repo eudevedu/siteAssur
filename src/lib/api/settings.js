@@ -27,9 +27,7 @@ export const settingsApi = {
   async update(key, value) {
     const { data, error } = await supabase
       .from('site_settings')
-      .upsert({ key, value, updated_at: new Date() }, { onConflict: 'key' })
-      .select()
-      .single()
+      .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
     if (error) throw error
     return data
   },
@@ -38,13 +36,12 @@ export const settingsApi = {
     const updates = Object.entries(settings).map(([key, value]) => ({
       key,
       value,
-      updated_at: new Date()
+      updated_at: new Date().toISOString()
     }))
 
     const { data, error } = await supabase
       .from('site_settings')
       .upsert(updates, { onConflict: 'key' })
-      .select()
     if (error) throw error
     return data
   }
