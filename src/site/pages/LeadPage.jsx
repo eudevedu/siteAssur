@@ -24,8 +24,12 @@ export default function LeadPage() {
 
   const fetchForm = async () => {
     setLoadingForm(true)
+    setError(null)
     try {
       const data = await formsApi.getBySlug('participar')
+      if (!data) {
+        throw new Error('Formulário "participar" não encontrado no banco de dados.')
+      }
       setForm(data)
 
       // Initialize form data
@@ -34,15 +38,39 @@ export default function LeadPage() {
       setFormData(initialData)
     } catch (err) {
       console.error('Erro ao buscar formulário de leads:', err)
+      setError(err.message || 'Erro ao carregar o formulário.')
     } finally {
       setLoadingForm(false)
     }
   }
 
-  if (settingsLoading || loadingForm || !settings || !form) {
+  if (settingsLoading || loadingForm) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <Loader2 className="animate-spin text-slate-900" size={40} />
+      </div>
+    )
+  }
+
+  if (error || !form || !settings) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md w-full text-center space-y-6 bg-white p-8 md:p-12 rounded-[32px] shadow-lg border border-slate-100">
+            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mx-auto">
+              <AlertCircle size={32} />
+            </div>
+            <h1 className="text-3xl font-display font-black text-slate-900">Ops!</h1>
+            <p className="text-slate-500 font-medium leading-relaxed">
+              {error || 'O formulário "participar" não pôde ser carregado.'}
+            </p>
+            <Link to="/" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl hover:scale-[1.02] active:scale-95 transition-all">
+              <ArrowLeft size={20} /> Voltar para o Início
+            </Link>
+          </div>
+        </main>
+        <Footer />
       </div>
     )
   }
