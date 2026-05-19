@@ -69,15 +69,21 @@ export default function AboutEditor() {
     if (e) e.preventDefault()
     setSaving(true)
     setMessage(null)
+    
+    // Diagnostic log to console
+    console.log('Tentando salvar Página Sobre com dados:', formData.about)
+    
     try {
       await settingsApi.update('about', formData.about)
       setMessage({ type: 'success', text: 'Página Sobre atualizada com sucesso!' })
+      alert('Página Sobre salva com sucesso no banco de dados!')
       
       // Run secondary updates and audit logging in the background without blocking the UI
       refreshSettings()
       logsApi.logAction('Atualizou Página Sobre', 'page', 'about')
     } catch (err) {
-      console.error(err)
+      console.error('Erro detalhado ao salvar Página Sobre:', err)
+      alert('Erro ao salvar no banco de dados:\n' + (err.message || err.description || JSON.stringify(err)))
       setMessage({ type: 'error', text: 'Erro ao salvar alterações.' })
     } finally {
       setSaving(false)
