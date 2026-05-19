@@ -39,11 +39,14 @@ export default function HomeEditor() {
     leadForm: { title: '', titleAccent: '', subtitle: '', buttonText: '', successTitle: '', successMessage: '', redirectUrl: '' }
   })
 
+  const [isInitialized, setIsInitialized] = useState(false)
+
   useEffect(() => {
-    if (currentSettings) {
+    if (currentSettings && !isInitialized) {
       setFormData(currentSettings)
+      setIsInitialized(true)
     }
-  }, [currentSettings])
+  }, [currentSettings, isInitialized])
 
   const handleInputChange = (section, field, value) => {
     setFormData(prev => ({
