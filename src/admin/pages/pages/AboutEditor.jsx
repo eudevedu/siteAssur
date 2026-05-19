@@ -71,9 +71,11 @@ export default function AboutEditor() {
     setMessage(null)
     try {
       await settingsApi.update('about', formData.about)
-      await refreshSettings()
-      await logsApi.logAction('Atualizou Página Sobre', 'page', 'about')
       setMessage({ type: 'success', text: 'Página Sobre atualizada com sucesso!' })
+      
+      // Run secondary updates and audit logging in the background without blocking the UI
+      refreshSettings()
+      logsApi.logAction('Atualizou Página Sobre', 'page', 'about')
     } catch (err) {
       console.error(err)
       setMessage({ type: 'error', text: 'Erro ao salvar alterações.' })

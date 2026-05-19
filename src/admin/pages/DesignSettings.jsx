@@ -31,9 +31,11 @@ export default function DesignSettings() {
     const toastId = toast.loading('Salvando alterações de design...')
     try {
       await settingsApi.update(key, value)
-      await logsApi.logAction('Atualizou identidade visual: ' + key, 'settings', key)
       toast.success('Design atualizado com sucesso!', { id: toastId })
+      
+      // Run in the background without blocking the save animation
       refreshSettings()
+      logsApi.logAction('Atualizou identidade visual: ' + key, 'settings', key)
     } catch (err) {
       console.error(err)
       toast.error('Erro ao salvar design.', { id: toastId })

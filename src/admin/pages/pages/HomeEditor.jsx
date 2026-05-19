@@ -61,9 +61,11 @@ export default function HomeEditor() {
     setMessage(null)
     try {
       await settingsApi.updateMultiple(formData)
-      await refreshSettings()
-      await logsApi.logAction('Atualizou Página Inicial', 'page', 'home')
       setMessage({ type: 'success', text: 'Página inicial atualizada com sucesso!' })
+      
+      // Run secondary updates and audit logging in the background without blocking the UI
+      refreshSettings()
+      logsApi.logAction('Atualizou Página Inicial', 'page', 'home')
     } catch (err) {
       console.error(err)
       setMessage({ type: 'error', text: 'Erro ao salvar alterações.' })

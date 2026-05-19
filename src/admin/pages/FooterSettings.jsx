@@ -42,9 +42,11 @@ export default function FooterSettings() {
     const toastId = toast.loading('Salvando alterações...')
     try {
       await settingsApi.update(key, value)
-      await logsApi.logAction('Atualizou configurações de ' + key, 'settings', key)
       toast.success('Alterações salvas com sucesso!', { id: toastId })
+      
+      // Run in the background without blocking the save animation
       refreshSettings()
+      logsApi.logAction('Atualizou configurações de ' + key, 'settings', key)
     } catch (err) {
       console.error(err)
       toast.error('Erro ao salvar.', { id: toastId })
