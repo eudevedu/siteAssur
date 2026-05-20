@@ -19,6 +19,7 @@ import {
   GripVertical
 } from 'lucide-react'
 import { settingsApi } from '../../lib/api/settings'
+import { supabase } from '../../lib/supabase'
 import { logsApi } from '../../lib/api/logs'
 import { useSettings } from '../../context/SettingsContext'
 import toast from 'react-hot-toast'
@@ -30,25 +31,32 @@ export default function FooterSettings() {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    if (settings) {
+    // Inicializa apenas quando siteSettings ainda é null (primeira carga)
+    if (settings && siteSettings === null) {
       setSiteSettings(JSON.parse(JSON.stringify(settings)))
       setLoading(false)
     }
-  }, [settings])
+  }, [settings, siteSettings])
 
   const handleSaveSettings = async (key, value) => {
     setIsSaving(true)
     const toastId = toast.loading('Salvando alterações...')
     try {
+      // Verificar sessão ativa antes de salvar
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('Você precisa estar logado para salvar.')
+      }
+
       await settingsApi.update(key, value)
+
+      // Atualiza só a chave salva no estado local (preserva outras edições em curso)
+      setSiteSettings(prev => ({ ...prev, [key]: value }))
       toast.success('Alterações salvas com sucesso!', { id: toastId })
-      
-      // Run in the background without blocking the save animation
-      refreshSettings()
       logsApi.logAction('Atualizou configurações de ' + key, 'settings', key)
     } catch (err) {
-      console.error(err)
-      toast.error('Erro ao salvar.', { id: toastId })
+      console.error('[handleSaveSettings] erro ao salvar "' + key + '":', err)
+      toast.error(err.message || 'Erro ao salvar. Verifique sua sessão.', { id: toastId })
     } finally {
       setIsSaving(false)
     }
@@ -249,8 +257,22 @@ export default function FooterSettings() {
               <div className="pt-4">
                 <button 
                   onClick={async () => {
-                    await handleSaveSettings('general', siteSettings.general);
-                    await handleSaveSettings('nav', siteSettings.nav);
+                    setIsSaving(true)
+                    const toastId = toast.loading('Salvando alterações...')
+                    try {
+                      await settingsApi.updateMultiple({
+                        general: siteSettings.general,
+                        nav: siteSettings.nav
+                      })
+                      toast.success('Alterações salvas com sucesso!', { id: toastId })
+                      refreshSettings()
+                      logsApi.logAction('Atualizou configurações de header/nav', 'settings', 'general+nav')
+                    } catch (err) {
+                      console.error(err)
+                      toast.error('Erro ao salvar: ' + (err.message || 'tente novamente'), { id: toastId })
+                    } finally {
+                      setIsSaving(false)
+                    }
                   }}
                   disabled={isSaving}
                   className="w-full py-4 bg-patriotic-green text-white rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2"
