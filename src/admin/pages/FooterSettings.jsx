@@ -8,7 +8,6 @@ import {
   Facebook, 
   Twitter, 
   Phone, 
-  MapPin, 
   Globe,
   Mail,
   CheckCircle2,
@@ -465,20 +464,7 @@ export default function FooterSettings() {
                     })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                    <MapPin size={14} /> Endereço do Gabinete
-                  </label>
-                  <textarea 
-                    rows="3"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-patriotic-green/20 resize-none"
-                    value={siteSettings.contact?.address || ''}
-                    onChange={(e) => setSiteSettings({
-                      ...siteSettings,
-                      contact: { ...siteSettings.contact, address: e.target.value }
-                    })}
-                  ></textarea>
-                </div>
+
               </div>
               <button 
                 onClick={() => handleSaveSettings('contact', siteSettings.contact)}

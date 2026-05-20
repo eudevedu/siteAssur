@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react'
+import { ArrowRight, Facebook, Instagram, Twitter, Mail, Phone } from 'lucide-react'
 import { useSettings } from '../../context/SettingsContext'
 import { Link } from 'react-router-dom'
 
@@ -90,15 +90,7 @@ function FooterComponent() {
                 <div className="text-white">{contact.phone}</div>
               </div>
             </li>
-            <li className="flex items-start gap-4">
-              <div className="p-2 bg-slate-900 rounded-lg text-slate-500">
-                <MapPin size={18} />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-slate-500 uppercase mb-1">Gabinete</div>
-                <div className="text-white text-sm">{contact.address}</div>
-              </div>
-            </li>
+
           </ul>
         </div>
 
