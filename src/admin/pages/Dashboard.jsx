@@ -38,21 +38,28 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [posts, projects, forms, leadsResponse] = await Promise.all([
-          postsApi.getAll(),
-          projectsApi.getAll(),
-          formsApi.getAll(),
-          supabase.from('leads').select('*').order('created_at', { ascending: false })
+        const [
+          postsRes,
+          projectsRes,
+          formsRes,
+          leadsRes,
+          recentLeadsRes
+        ] = await Promise.all([
+          supabase.from('posts').select('*', { count: 'exact', head: true }),
+          supabase.from('projects').select('*', { count: 'exact', head: true }),
+          supabase.from('forms').select('*', { count: 'exact', head: true }),
+          supabase.from('leads').select('*', { count: 'exact', head: true }),
+          supabase.from('leads').select('*').order('created_at', { ascending: false }).limit(3)
         ])
 
         setStats({
-          posts: posts.length,
-          projects: projects.length,
-          forms: forms.length,
-          leads: leadsResponse.data?.length || 0
+          posts: postsRes.count || 0,
+          projects: projectsRes.count || 0,
+          forms: formsRes.count || 0,
+          leads: leadsRes.count || 0
         })
 
-        setRecentLeads(leadsResponse.data?.slice(0, 3) || [])
+        setRecentLeads(recentLeadsRes.data || [])
       } catch (err) {
         console.error(err)
       } finally {

@@ -59,3 +59,4 @@ out/
 supabase/.branches/
 supabase/migrations/.trash/
 supabase/.temp/
+scratch/test_db.js
