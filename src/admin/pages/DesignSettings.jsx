@@ -20,11 +20,11 @@ export default function DesignSettings() {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    if (settings) {
+    if (settings && siteSettings === null) {
       setSiteSettings(JSON.parse(JSON.stringify(settings)))
       setLoading(false)
     }
-  }, [settings])
+  }, [settings, siteSettings])
 
   const handleSaveSettings = async (key, value) => {
     setIsSaving(true)
@@ -32,6 +32,8 @@ export default function DesignSettings() {
     try {
       await settingsApi.update(key, value)
       toast.success('Design atualizado com sucesso!', { id: toastId })
+      
+      setSiteSettings(prev => ({ ...prev, [key]: value }))
       
       // Run in the background without blocking the save animation
       refreshSettings()

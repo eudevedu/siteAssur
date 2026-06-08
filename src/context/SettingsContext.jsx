@@ -67,8 +67,9 @@ export function SettingsProvider({ children }) {
       console.error('Failed to load site settings:', err)
       setError(err)
       
-      if (!settings) {
-        setSettings({
+      setSettings(current => {
+        if (current) return current
+        return {
           general: {
             name: fallbackConfig.name,
             shortName: fallbackConfig.shortName,
@@ -84,16 +85,17 @@ export function SettingsProvider({ children }) {
           leadForm: {},
           stats: [],
           about: {}
-        })
-      }
+        }
+      })
     } finally {
       setLoading(false)
     }
-  }, [settings])
+  }, [])
 
   useEffect(() => {
-    // Carrega em silêncio se já tivermos dados em cache
-    loadSettings(!!settings)
+    // Carrega em silêncio se já tivermos dados em cache no localStorage
+    const hasCache = !!localStorage.getItem('site_settings')
+    loadSettings(hasCache)
   }, [loadSettings])
 
   useEffect(() => {
