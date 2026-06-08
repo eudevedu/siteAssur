@@ -34,10 +34,25 @@ export function SettingsProvider({ children }) {
       localStorage.setItem('nav_pages', JSON.stringify(filteredPages))
       
       const mergedSettings = {
-        general: data.general || {},
-        colors: data.colors || {},
-        socials: data.socials || {},
-        contact: data.contact || {},
+        general: {
+          name: data.general?.name || fallbackConfig.name,
+          shortName: data.general?.shortName || fallbackConfig.shortName,
+          slogan: data.general?.slogan || fallbackConfig.slogan,
+          description: data.general?.description || fallbackConfig.description,
+          ...data.general
+        },
+        colors: {
+          ...fallbackConfig.colors,
+          ...data.colors
+        },
+        socials: {
+          ...fallbackConfig.socials,
+          ...data.socials
+        },
+        contact: {
+          ...fallbackConfig.contact,
+          ...data.contact
+        },
         hero: data.hero || {},
         nav: data.nav || {},
         footer: data.footer || {},
@@ -53,7 +68,23 @@ export function SettingsProvider({ children }) {
       setError(err)
       
       if (!settings) {
-        setSettings({})
+        setSettings({
+          general: {
+            name: fallbackConfig.name,
+            shortName: fallbackConfig.shortName,
+            slogan: fallbackConfig.slogan,
+            description: fallbackConfig.description
+          },
+          colors: fallbackConfig.colors,
+          socials: fallbackConfig.socials,
+          contact: fallbackConfig.contact,
+          hero: {},
+          nav: {},
+          footer: {},
+          leadForm: {},
+          stats: [],
+          about: {}
+        })
       }
     } finally {
       setLoading(false)
@@ -69,16 +100,21 @@ export function SettingsProvider({ children }) {
     if (settings?.colors) {
       const root = document.documentElement;
       const { colors } = settings;
-      root.style.setProperty('--color-primary', colors.primary);
-      root.style.setProperty('--color-secondary', colors.secondary);
-      root.style.setProperty('--color-accent', colors.accent);
       
-      root.style.setProperty('--color-primary-light', `${colors.primary}E6`);
-      root.style.setProperty('--color-primary-dark', `${colors.primary}CC`);
-      root.style.setProperty('--color-secondary-light', `${colors.secondary}E6`);
-      root.style.setProperty('--color-secondary-dark', `${colors.secondary}CC`);
-      root.style.setProperty('--color-accent-light', `${colors.accent}E6`);
-      root.style.setProperty('--color-accent-dark', `${colors.accent}CC`);
+      const primary = colors.primary || fallbackConfig.colors.primary;
+      const secondary = colors.secondary || fallbackConfig.colors.secondary;
+      const accent = colors.accent || fallbackConfig.colors.accent;
+
+      root.style.setProperty('--color-primary', primary);
+      root.style.setProperty('--color-secondary', secondary);
+      root.style.setProperty('--color-accent', accent);
+      
+      root.style.setProperty('--color-primary-light', `${primary}E6`);
+      root.style.setProperty('--color-primary-dark', `${primary}CC`);
+      root.style.setProperty('--color-secondary-light', `${secondary}E6`);
+      root.style.setProperty('--color-secondary-dark', `${secondary}CC`);
+      root.style.setProperty('--color-accent-light', `${accent}E6`);
+      root.style.setProperty('--color-accent-dark', `${accent}CC`);
     }
   }, [settings])
 
