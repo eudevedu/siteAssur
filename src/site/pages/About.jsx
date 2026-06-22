@@ -16,7 +16,7 @@ export default function About() {
     )
   }
 
-  const { about, colors, general } = settings
+  const { about = {}, colors, general } = settings
 
   return (
     <div className="min-h-screen bg-slate-50/40 selection:bg-slate-900 selection:text-white">
@@ -58,9 +58,9 @@ export default function About() {
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg" style={{ backgroundColor: colors.primary }}>
                       <Heart size={20} fill="currentColor" />
                     </div>
-                    <span className="font-black text-xs uppercase tracking-widest text-slate-900">Compromisso Real</span>
+                    <span className="font-black text-xs uppercase tracking-widest text-slate-900">{about.badgeTitle || 'Compromisso Real'}</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 font-bold leading-tight uppercase tracking-wider">Dedicação total à nossa gente e ao futuro da região.</p>
+                  <p className="text-[10px] text-slate-400 font-bold leading-tight uppercase tracking-wider">{about.badgeDescription || 'Dedicação total à nossa gente e ao futuro da região.'}</p>
                 </div>
               </div>
             </div>

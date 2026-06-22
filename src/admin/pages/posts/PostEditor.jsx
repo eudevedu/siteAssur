@@ -3,9 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { postsApi } from '../../../lib/api/posts'
 import { categoriesApi } from '../../../lib/api/categories'
 import { logsApi } from '../../../lib/api/logs'
-import TinyEditor from '../../components/editor/TinyEditor'
+import RichEditor from '../../components/editor/RichEditor'
 import ImageUploader from '../../components/ui/ImageUploader'
-import { Save, ChevronLeft, Globe, Eye, Settings, Plus, User, Calendar } from 'lucide-react'
+import { Save, ChevronLeft, Globe, Eye, Settings, Plus, User, Calendar, Loader2 } from 'lucide-react'
 import slugify from 'slugify'
 import { supabase } from '../../../lib/supabase'
 import toast from 'react-hot-toast'
@@ -15,6 +15,7 @@ export default function PostEditor() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(Boolean(id))
   const [categories, setCategories] = useState([])
   const [users, setUsers] = useState([])
 
@@ -73,6 +74,7 @@ export default function PostEditor() {
   }
 
   const fetchPost = async () => {
+    setFetching(true)
     try {
       const data = await postsApi.getById(id)
       setForm({
@@ -82,6 +84,8 @@ export default function PostEditor() {
       })
     } catch (err) {
       console.error('Erro ao buscar notícia:', err)
+    } finally {
+      setFetching(false)
     }
   }
 
@@ -140,6 +144,14 @@ export default function PostEditor() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (fetching) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <Loader2 className="animate-spin text-patriotic-green" size={40} />
+      </div>
+    )
   }
 
   return (
@@ -204,9 +216,10 @@ export default function PostEditor() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Conteúdo</label>
-                <TinyEditor
+                <RichEditor
                   value={form.content}
                   onChange={(content) => setForm({ ...form, content })}
+                  placeholder="Escreva o conteúdo da notícia aqui..."
                 />
               </div>
             </div>

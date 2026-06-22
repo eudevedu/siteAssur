@@ -7,11 +7,17 @@ import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
 import ptBR from 'date-fns/locale/pt-BR'
 import { useSettings } from '../../context/SettingsContext'
+import SEO from '../components/SEO'
 
 export default function Blog() {
   const { settings } = useSettings()
-  const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [posts, setPosts] = useState(() => {
+    const saved = sessionStorage.getItem('list_posts')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [loading, setLoading] = useState(() => {
+    return !sessionStorage.getItem('list_posts')
+  })
 
   const colors = settings?.colors || { primary: '#006738' }
 
@@ -22,7 +28,8 @@ export default function Blog() {
   const fetchPosts = async () => {
     try {
       const data = await postsApi.getAll({ status: 'published' })
-      setPosts(data)
+      setPosts(data || [])
+      sessionStorage.setItem('list_posts', JSON.stringify(data || []))
     } catch (err) {
       console.error(err)
     } finally {
@@ -30,15 +37,36 @@ export default function Blog() {
     }
   }
 
+  const renderListTitle = () => {
+    const title = settings?.blog?.listTitle || "Notícias e Atualizações"
+    const lastSpaceIndex = title.lastIndexOf(' ')
+    if (lastSpaceIndex === -1) {
+      return <span style={{ color: colors.primary }}>{title}</span>
+    }
+    const mainText = title.substring(0, lastSpaceIndex)
+    const highlightText = title.substring(lastSpaceIndex + 1)
+    return (
+      <span>
+        {mainText} <span style={{ color: colors.primary }}>{highlightText}</span>
+      </span>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
+      <SEO 
+        title={settings?.blog?.listTitle || "Notícias e Atualizações"} 
+        description={settings?.blog?.listDescription || "Fique por dentro de todas as ações, projetos e novidades do nosso mandato."} 
+      />
       <Header />
  
       <main className="pt-32 pb-20 max-w-7xl mx-auto px-4">
         <div className="mb-16 text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-display font-bold text-slate-900">Notícias e <span style={{ color: colors.primary }}>Atualizações</span></h1>
+          <h1 className="text-4xl md:text-6xl font-display font-bold text-slate-900">
+            {renderListTitle()}
+          </h1>
           <p className="text-slate-500 max-w-2xl mx-auto">
-            Fique por dentro de todas as ações, projetos e novidades do nosso mandato.
+            {settings?.blog?.listDescription || "Fique por dentro de todas as ações, projetos e novidades do nosso mandato."}
           </p>
         </div>
 

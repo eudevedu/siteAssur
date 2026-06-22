@@ -8,7 +8,8 @@ import {
   AlertCircle, 
   ArrowLeft,
   Type,
-  AlignLeft
+  AlignLeft,
+  Heart
 } from 'lucide-react'
 import { settingsApi } from '../../../lib/api/settings'
 import { logsApi } from '../../../lib/api/logs'
@@ -30,7 +31,9 @@ export default function AboutEditor() {
       image_url: '',
       mission: '',
       values: '',
-      purpose: ''
+      purpose: '',
+      badgeTitle: '',
+      badgeDescription: ''
     }
   })
 
@@ -44,7 +47,9 @@ export default function AboutEditor() {
           image_url: currentSettings.about.image_url || '',
           mission: currentSettings.about.mission || '',
           values: currentSettings.about.values || '',
-          purpose: currentSettings.about.purpose || ''
+          purpose: currentSettings.about.purpose || '',
+          badgeTitle: currentSettings.about.badgeTitle || '',
+          badgeDescription: currentSettings.about.badgeDescription || ''
         }
       })
       setIsInitialized(true)
@@ -172,6 +177,36 @@ export default function AboutEditor() {
                   placeholder="Escreva aqui sua biografia completa..."
                 />
                 <p className="text-[10px] text-slate-400 italic">Dica: O texto será formatado automaticamente com parágrafos no site.</p>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 space-y-6">
+                <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                  <Heart size={16} className="text-red-500" />
+                  Emblema Lateral da Foto (Destaque)
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Título do Emblema</label>
+                    <input 
+                      type="text" 
+                      value={formData.about.badgeTitle || ''}
+                      onChange={(e) => handleInputChange('about', 'badgeTitle', e.target.value)}
+                      className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-2 focus:ring-patriotic-green/20 focus:border-patriotic-green outline-none transition-all font-semibold"
+                      placeholder="Ex: Compromisso Real"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Descrição do Emblema</label>
+                    <input 
+                      type="text" 
+                      value={formData.about.badgeDescription || ''}
+                      onChange={(e) => handleInputChange('about', 'badgeDescription', e.target.value)}
+                      className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-2 focus:ring-patriotic-green/20 focus:border-patriotic-green outline-none transition-all text-sm font-medium"
+                      placeholder="Dedicação total à nossa gente e ao futuro da região."
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="pt-4 border-t border-slate-100">

@@ -9,8 +9,13 @@ import { useSettings } from '../../context/SettingsContext'
 
 export default function Portfolio() {
   const { settings } = useSettings()
-  const [projects, setProjects] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [projects, setProjects] = useState(() => {
+    const saved = sessionStorage.getItem('list_projects')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [loading, setLoading] = useState(() => {
+    return !sessionStorage.getItem('list_projects')
+  })
 
   const colors = settings?.colors || { primary: '#006738' }
 
@@ -22,6 +27,7 @@ export default function Portfolio() {
     try {
       const data = await projectsApi.getAll({ status: 'published' })
       setProjects(data || [])
+      sessionStorage.setItem('list_projects', JSON.stringify(data || []))
     } catch (err) {
       console.error(err)
     } finally {
@@ -29,16 +35,36 @@ export default function Portfolio() {
     }
   }
 
+  const renderListTitle = () => {
+    const title = settings?.projects?.listTitle || "Nosso Trabalho"
+    const lastSpaceIndex = title.lastIndexOf(' ')
+    if (lastSpaceIndex === -1) {
+      return <span style={{ color: colors.primary }}>{title}</span>
+    }
+    const mainText = title.substring(0, lastSpaceIndex)
+    const highlightText = title.substring(lastSpaceIndex + 1)
+    return (
+      <span>
+        {mainText} <span style={{ color: colors.primary }}>{highlightText}</span>
+      </span>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <SEO title="Meu Trabalho" description="Conheça os projetos e ações que estão transformando nossa região." />
+      <SEO 
+        title={settings?.projects?.listTitle || "Meu Trabalho"} 
+        description={settings?.projects?.listDescription || "Conheça os projetos e ações que estão transformando nossa região."} 
+      />
       <Header />
       
       <main className="pt-32 pb-20 max-w-7xl mx-auto px-4">
         <div className="mb-16 text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-display font-black text-slate-900">Nosso <span style={{ color: colors.primary }}>Trabalho</span></h1>
+          <h1 className="text-4xl md:text-6xl font-display font-black text-slate-900">
+            {renderListTitle()}
+          </h1>
           <p className="text-slate-500 max-w-2xl mx-auto">
-            Projetos, obras e conquistas que estão transformando a realidade de nossa região.
+            {settings?.projects?.listDescription || "Projetos, obras e conquistas que estão transformando a realidade de nossa região."}
           </p>
         </div>
 

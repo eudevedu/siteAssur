@@ -33,6 +33,12 @@ export default function RichEditor({ value, onChange, placeholder = 'Comece a es
     },
   })
 
+  React.useEffect(() => {
+    if (editor && value !== undefined && value !== editor.getHTML()) {
+      editor.commands.setContent(value || '')
+    }
+  }, [value, editor])
+
   if (!editor) return null
 
   return (

@@ -41,9 +41,17 @@ const MouseGlow = ({ color = 'rgba(0, 103, 56, 0.08)' }) => {
 export default function Home() {
   const { settings, loading } = useSettings()
   const [isLeadFormOpen, setIsLeadFormOpen] = useState(false)
-  const [latestPosts, setLatestPosts] = useState([])
-  const [featuredProjects, setFeaturedProjects] = useState([])
-  const [dataLoading, setDataLoading] = useState(true)
+  const [latestPosts, setLatestPosts] = useState(() => {
+    const saved = sessionStorage.getItem('home_posts')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [featuredProjects, setFeaturedProjects] = useState(() => {
+    const saved = sessionStorage.getItem('home_projects')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [dataLoading, setDataLoading] = useState(() => {
+    return !sessionStorage.getItem('home_posts') || !sessionStorage.getItem('home_projects')
+  })
 
   useEffect(() => {
     fetchHomeData()
@@ -55,8 +63,14 @@ export default function Home() {
         postsApi.getAll({ status: 'published', limit: 3 }),
         projectsApi.getAll({ status: 'published', limit: 4 })
       ])
-      setLatestPosts(posts || [])
-      setFeaturedProjects(projects?.filter(p => p.featured).slice(0, 4) || projects?.slice(0, 4) || [])
+      const pData = posts || []
+      const prData = projects?.filter(p => p.featured).slice(0, 4) || projects?.slice(0, 4) || []
+      
+      setLatestPosts(pData)
+      setFeaturedProjects(prData)
+      
+      sessionStorage.setItem('home_posts', JSON.stringify(pData))
+      sessionStorage.setItem('home_projects', JSON.stringify(prData))
     } catch (err) {
       console.error('Erro ao carregar dados da home:', err)
     } finally {
@@ -75,6 +89,78 @@ export default function Home() {
   }
 
   const { general, hero, colors, stats, socials, nav } = settings
+
+  const renderHeroTitle = () => {
+    const title = hero.title || 'Vamos juntos fazer o melhor!'
+    const accent = hero.titleAccent || 'melhor!'
+    if (!title.includes(accent)) {
+      return (
+        <span>
+          {title}{' '}
+          <span 
+            className="text-transparent bg-clip-text bg-gradient-to-br"
+            style={{ backgroundImage: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primary}CC)` }}
+          >
+            {accent}
+          </span>
+        </span>
+      )
+    }
+    const parts = title.split(accent)
+    return (
+      <span>
+        {parts[0]}
+        <span 
+          className="text-transparent bg-clip-text bg-gradient-to-br"
+          style={{ backgroundImage: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primary}CC)` }}
+        >
+          {accent}
+        </span>
+        {parts.slice(1).join(accent)}
+      </span>
+    )
+  }
+
+  const renderProjectsTitle = () => {
+    const title = settings.projects?.title || 'Trabalho que Transforma.'
+    const accent = settings.projects?.titleAccent || 'Transforma.'
+    if (!title.includes(accent)) {
+      return <span>{title} <span className="italic" style={{ color: colors.primary }}>{accent}</span></span>
+    }
+    const parts = title.split(accent)
+    return (
+      <span>
+        {parts[0]}
+        <span className="italic" style={{ color: colors.primary }}>{accent}</span>
+        {parts.slice(1).join(accent)}
+      </span>
+    )
+  }
+
+  const renderBlogTitle = () => {
+    const title = settings.blog?.title || 'Últimas Notícias.'
+    const accent = settings.blog?.titleAccent || 'Notícias.'
+    if (!title.includes(accent)) {
+      return (
+        <span>
+          {title}{' '}
+          <span className="underline underline-offset-8" style={{ textDecorationColor: colors.secondary, color: colors.primary }}>
+            {accent}
+          </span>
+        </span>
+      )
+    }
+    const parts = title.split(accent)
+    return (
+      <span>
+        {parts[0]}
+        <span className="underline underline-offset-8" style={{ textDecorationColor: colors.secondary, color: colors.primary }}>
+          {accent}
+        </span>
+        {parts.slice(1).join(accent)}
+      </span>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white selection:bg-slate-900 selection:text-white relative">
@@ -110,14 +196,7 @@ export default function Home() {
             </div>
 
             <h1 className="text-6xl lg:text-9xl font-display font-black text-slate-900 leading-[0.9] tracking-tighter">
-              {hero.title.split(hero.titleAccent)[0]}
-              <span
-                className="text-transparent bg-clip-text bg-gradient-to-br"
-                style={{ backgroundImage: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primary}CC)` }}
-              >
-                {hero.titleAccent}
-              </span>
-              {hero.title.split(hero.titleAccent)[1]}
+              {renderHeroTitle()}
             </h1>
 
             <p className="text-xl text-slate-500 max-w-xl font-medium leading-relaxed">
@@ -177,11 +256,11 @@ export default function Home() {
                   className="font-bold uppercase tracking-widest text-sm mb-4"
                   style={{ color: colors.secondary }}
                 >
-                  Liderança & Inovação
+                  {hero.photoSub || 'Liderança & Inovação'}
                 </div>
                 <div className="flex gap-2">
-                  <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-black uppercase">Ficha Limpa</div>
-                  <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-black uppercase">Resultados</div>
+                  {(hero.badge1 || !('badge1' in hero)) && <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-black uppercase">{hero.badge1 || 'Ficha Limpa'}</div>}
+                  {(hero.badge2 || !('badge2' in hero)) && <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-black uppercase">{hero.badge2 || 'Resultados'}</div>}
                 </div>
               </div>
             </div>
@@ -199,10 +278,10 @@ export default function Home() {
                   className="text-sm font-black uppercase tracking-[0.4em]"
                   style={{ color: colors.primary }}
                 >
-                  Conquistas & Ações
+                  {settings.projects?.subtitle || 'Conquistas & Ações'}
                 </h2>
                 <h3 className="text-5xl font-display font-black text-slate-900 leading-tight">
-                  Trabalho que <span className="italic" style={{ color: colors.primary }}>Transforma.</span>
+                  {renderProjectsTitle()}
                 </h3>
               </div>
               <Link 
@@ -262,10 +341,10 @@ export default function Home() {
                 className="text-sm font-black uppercase tracking-[0.4em]"
                 style={{ color: colors.primary }}
               >
-                Fique por Dentro
+                {settings.blog?.subtitle || 'Fique por Dentro'}
               </h2>
               <h3 className="text-5xl font-display font-black text-slate-900">
-                Últimas <span className="underline underline-offset-8" style={{ textDecorationColor: colors.secondary, color: colors.primary }}>Notícias.</span>
+                {renderBlogTitle()}
               </h3>
             </div>
 
