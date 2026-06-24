@@ -18,48 +18,34 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
 
-          // GrapesJS e todos os seus plugins — chunk isolado, carregado só no admin/pages
+          // GrapesJS e plugins — chunk isolado, carregado APENAS no admin/pages/editor
+          // Graças aos dynamic imports no GrapesEditor.jsx, este chunk nunca é
+          // baixado por visitantes do site público.
           if (
-            id.includes('grapesjs') ||
-            id.includes('grapesjs-preset-webpage') ||
-            id.includes('grapesjs-blocks-basic') ||
-            id.includes('grapesjs-plugin-forms') ||
-            id.includes('grapesjs-component-countdown') ||
-            id.includes('grapesjs-tabs') ||
-            id.includes('grapesjs-custom-code') ||
-            id.includes('grapesjs-style-filter')
+            id.includes('grapesjs')
           ) {
             return 'grapesjs';
           }
 
-          // Tiptap (editor de posts/projetos)
-          if (id.includes('@tiptap') || id.includes('tiptap')) {
+          // Tiptap + ProseMirror (deps internas do Tiptap) — editor de posts/projetos
+          if (id.includes('@tiptap') || id.includes('tiptap') || id.includes('prosemirror')) {
             return 'tiptap';
           }
 
-          // Supabase — separado do resto do vendor
+          // Supabase — cliente de dados, separado do resto
           if (id.includes('@supabase') || id.includes('supabase')) {
             return 'supabase';
           }
 
-          // Lucide icons — separado para evitar import total
+          // Lucide icons — tree-shakeable mas grande; chunk separado
           if (id.includes('lucide-react')) {
             return 'lucide-icons';
           }
 
-          // React + React DOM + React Router — devem ficar no mesmo chunk
-          // (react-router depende de React.createContext e não pode carregar antes do React)
-          if (
-            id.includes('react-dom') ||
-            id.includes('/react/') ||
-            id.includes('react-router-dom') ||
-            id.includes('@remix-run')
-          ) {
-            return 'react-vendor';
-          }
-
-          // Tudo mais vai no vendor genérico
-          return 'vendor';
+          // React e TODAS as bibliotecas que dependem de React ficam no vendor.
+          // NÃO separar react, react-dom, react-router-dom ou react-* em chunks
+          // distintos — causam erros de "createContext of undefined" por ordem
+          // de carregamento não garantida entre chunks paralelos.
         },
       },
     },
