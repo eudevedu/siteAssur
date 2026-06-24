@@ -47,14 +47,15 @@ export default defineConfig({
             return 'lucide-icons';
           }
 
-          // React core — separado do router
-          if (id.includes('react-dom') || id.includes('/react/')) {
-            return 'react-core';
-          }
-
-          // React Router separado do React
-          if (id.includes('react-router-dom') || id.includes('@remix-run')) {
-            return 'react-router';
+          // React + React DOM + React Router — devem ficar no mesmo chunk
+          // (react-router depende de React.createContext e não pode carregar antes do React)
+          if (
+            id.includes('react-dom') ||
+            id.includes('/react/') ||
+            id.includes('react-router-dom') ||
+            id.includes('@remix-run')
+          ) {
+            return 'react-vendor';
           }
 
           // Tudo mais vai no vendor genérico
