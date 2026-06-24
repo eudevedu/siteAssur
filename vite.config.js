@@ -11,39 +11,56 @@ export default defineConfig({
     },
   },
   build: {
+    target: 'esnext',
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('grapesjs')) {
-              return 'grapesjs';
-            }
-            if (
-              id.includes('@tinymce') ||
-              id.includes('tinymce') ||
-              id.includes('@tiptap') ||
-              id.includes('tiptap')
-            ) {
-              return 'editors';
-            }
-            if (id.includes('@supabase') || id.includes('supabase')) {
-              return 'supabase';
-            }
-            if (id.includes('lucide-react')) {
-              return 'lucide-icons';
-            }
-            if (
-              id.includes('react') ||
-              id.includes('react-dom') ||
-              id.includes('react-router-dom')
-            ) {
-              return 'react-core';
-            }
-            return 'vendor';
+          if (!id.includes('node_modules')) return;
+
+          // GrapesJS e todos os seus plugins — chunk isolado, carregado só no admin/pages
+          if (
+            id.includes('grapesjs') ||
+            id.includes('grapesjs-preset-webpage') ||
+            id.includes('grapesjs-blocks-basic') ||
+            id.includes('grapesjs-plugin-forms') ||
+            id.includes('grapesjs-component-countdown') ||
+            id.includes('grapesjs-tabs') ||
+            id.includes('grapesjs-custom-code') ||
+            id.includes('grapesjs-style-filter')
+          ) {
+            return 'grapesjs';
           }
+
+          // Tiptap (editor de posts/projetos)
+          if (id.includes('@tiptap') || id.includes('tiptap')) {
+            return 'tiptap';
+          }
+
+          // Supabase — separado do resto do vendor
+          if (id.includes('@supabase') || id.includes('supabase')) {
+            return 'supabase';
+          }
+
+          // Lucide icons — separado para evitar import total
+          if (id.includes('lucide-react')) {
+            return 'lucide-icons';
+          }
+
+          // React core — separado do router
+          if (id.includes('react-dom') || id.includes('/react/')) {
+            return 'react-core';
+          }
+
+          // React Router separado do React
+          if (id.includes('react-router-dom') || id.includes('@remix-run')) {
+            return 'react-router';
+          }
+
+          // Tudo mais vai no vendor genérico
+          return 'vendor';
         },
       },
     },
   },
 })
-

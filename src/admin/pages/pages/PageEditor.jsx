@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { lazy, Suspense, useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { 
   ArrowLeft, 
@@ -12,9 +12,9 @@ import {
 } from 'lucide-react'
 import { pagesApi } from '../../../lib/api/pages'
 import { logsApi } from '../../../lib/api/logs'
-import GrapesEditor from '../../components/editor/GrapesEditor'
-
 import toast from 'react-hot-toast'
+
+const GrapesEditor = lazy(() => import('../../components/editor/GrapesEditor'))
 
 export default function PageEditor() {
   const { id } = useParams()
@@ -244,10 +244,19 @@ export default function PageEditor() {
               <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 px-4 py-1.5 bg-slate-900/10 backdrop-blur-md rounded-full text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
                 Visual Builder Ativo
               </div>
-              <GrapesEditor
-                value={formData.content}
-                onChange={(content) => setFormData(prev => ({ ...prev, content }))}
-              />
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-[800px] bg-slate-50">
+                  <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="animate-spin text-patriotic-green" size={36} />
+                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">Carregando Editor...</p>
+                  </div>
+                </div>
+              }>
+                <GrapesEditor
+                  value={formData.content}
+                  onChange={(content) => setFormData(prev => ({ ...prev, content }))}
+                />
+              </Suspense>
             </div>
           </div>
 
